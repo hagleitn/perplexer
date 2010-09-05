@@ -1,0 +1,4 @@
+Problem 1:
+1. Linear Partition - Given a set S {a_1,a_2,..a_n} of non-negative
+integers, partition the set into k partitions so as to minimize the
+maximum sum in any single partition.
