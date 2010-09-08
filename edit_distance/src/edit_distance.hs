@@ -1,6 +1,5 @@
 import Data.List
 import Data.Array
-import Data.Maybe
 
 instance (Ord a) => Ix [a] where
   range (m,n) = map (\i -> [ undefined | _ <- [1..i]]) [(length m)..(length n)]
