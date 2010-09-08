@@ -28,7 +28,7 @@ editDistance delCost insCost editCost v w =
         dist ([],[]) = (0,[[]])
         dist k@([],y) = mkIns k
         dist k@(x,[]) = mkDel k
-        dist k@(x,y)  = minimum [ mkIns k, mkDel k, mkEdit k ]
+        dist k  = minimum [ mkIns k, mkDel k, mkEdit k ]
       in
         (fmap dist (array (([],[]),(v,w)) [ ((i,j),(i,j)) | i <- (tails v), j <- (tails w) ]) !)
 
