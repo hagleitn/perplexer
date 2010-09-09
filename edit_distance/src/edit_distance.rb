@@ -46,13 +46,14 @@ class EditDistance
   def edit_distance_bt(l,t,table)
     res = [{:op => :init, :str => l}]
     i,j = 0,0,0,0
-    while ((i < l.size || j < t.size) && table[i][j] != 0) 
+    while ((i < l.size || j < t.size) ) 
+      min = 0
       if j == t.size
         op,i,j = :delete,i+1,j 
       elsif i == l.size 
         op,i,j = :insert,i,j+1
       else
-        p ({:i => i, :j => j}) if $DEBUG
+        #p ({:i => i, :j => j}) if $DEBUG
         c0 = table[i][j]
         c1 = c0 - table[i+1][j+1] if !table[i+1].nil? && !table[i+1][j+1].nil?  #replace
         c2 = c0 - table[i+1][j]  if !table[i+1].nil? && !table[i+1][j].nil? #delete
@@ -60,12 +61,12 @@ class EditDistance
         min = c0
         p ({:min => min, :replace => c1, :delete => c2, :insert => c3}) if $DEBUG
         op,i,j = :nop,i+1,j+1
-        min,op,i,j = c1,:replace,i+1,j+1 if !c1.nil? && c1 <= min && c1 >= 0
-        min,op,i,j = c2,:delete,i+1,j if  !c2.nil? && c2 <= min && c2 >= 0
-        min,op,i,j = c3,:insert,i,j+1 if !c3.nil? && c3 <= min && c3 >= 0
+        min,op,i,j = c1,:replace,i+1,j+1 if !c1.nil? && c1 <= min
+        min,op,i,j = c2,:delete,i+1,j if  !c2.nil? && c2 <= min
+        min,op,i,j = c3,:insert,i,j+1 if !c3.nil? && c3 <= min
       end
+      op = :nop if min < 0
       r = {:op => op, :str => transform(op,l,t,i,j,table)}
-      p r if $DEBUG
       res<< r if r[:op] != :nop
     end
     res
