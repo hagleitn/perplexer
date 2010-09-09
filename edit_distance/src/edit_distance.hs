@@ -28,9 +28,8 @@ editDistance delCost insCost editCost v w =
     memoized_dist =
       let        
         dist ([],[]) = (0,[[]])
-        dist k@([],y) = ins k
-        dist k@(x,[]) = del k
-        dist k  = minimum [ ins k, del k, edit k ]
+        dist k@(x,y) | x == [] = ins k | y == [] = del k
+	             | otherwise = minimum [ ins k, del k, edit k ]
       in
         (fmap dist (array (([],[]),(v,w)) [ ((i,j),(i,j)) | i <- tails v, j <- tails w ]) !)
 
