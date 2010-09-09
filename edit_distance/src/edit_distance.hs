@@ -1,11 +1,13 @@
 import Data.List
 import Data.Array
+import System( getArgs )
 
 instance (Ord a) => Ix [a] where
   range (m,n) = map (\i -> [ undefined | _ <- [1..i]]) [(length m)..(length n)]
   index (m,n) i = index (length m, length n) (length i)
   inRange (m,n) i = inRange (length m, length n) (length i)
 
+editDistance :: (Num b, Ord b, Ord a) => (a -> b) -> (a -> b) -> (a -> a -> b) -> [a] -> [a] -> (b,[[a]])
 editDistance delCost insCost editCost v w =
   let
     mkIns (x,(y:ys)) = (c+(insCost y), (y:s):r)
@@ -36,4 +38,5 @@ editDistance delCost insCost editCost v w =
   in
     (rev . memoized_dist) (v,w)
 
+editDist :: (Num b, Ord b, Ord a) => [a] -> [a] -> (b,[[a]])    
 editDist v w = editDistance (const 2) (const 3) (\i j -> 1) v w
