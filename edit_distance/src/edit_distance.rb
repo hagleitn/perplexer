@@ -66,7 +66,7 @@ class EditDistance
       end
       r = {:op => op, :str => transform(op,l,t,i,j,table)}
       p r if $DEBUG
-      res<< r if !r[:op] == :nop
+      res<< r if r[:op] != :nop
     end
     res
   end
