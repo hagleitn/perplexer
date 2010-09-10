@@ -92,3 +92,5 @@ class EditDistance
     return {:cost => edist, :steps => steps}
   end
 end
+
+p EditDistance.new().edit_distance_wrapper(ARGV[0], ARGV[1]);
