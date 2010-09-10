@@ -9,13 +9,13 @@ class EditDistanceTest < Test::Unit::TestCase
     l = "foo1"
     t = "baz"
     r = @ed.edit_distance_wrapper(l,t)
-    r[:steps].each {|x| p x} if $DEBUG
+    r[:steps].each {|x| p x} #if $DEBUG
     assert_equal(5,r[:cost])
 
     l = "abcdefghijkl"
     t = "bcdefghxlm"
     r = @ed.edit_distance_wrapper(l,t)
-    r[:steps].each {|x| p x} if $DEBUG
+    r[:steps].each {|x| p x} #if $DEBUG
     assert_equal(7,r[:cost])
 
     l = "abrackadbrea"
@@ -23,6 +23,6 @@ class EditDistanceTest < Test::Unit::TestCase
     p({:l => l, :t => t}) if $DEBUG
     r = @ed.edit_distance_wrapper(l,t)
     assert_equal(5,r[:cost])
-    r[:steps].each {|x| p x} if $DEBUG
+    r[:steps].each {|x| p x} #if $DEBUG
   end
 end
