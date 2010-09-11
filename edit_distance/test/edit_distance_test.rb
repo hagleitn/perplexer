@@ -3,7 +3,7 @@ require 'test/unit'
 
 class EditDistanceTest < Test::Unit::TestCase
   def setup
-    @ed = EditDistance.new
+    @ed = EditDistance.new(1,2,3)
   end
   def test_edit_distance
     l = "foo"
