@@ -40,31 +40,32 @@ wallOrWay b = if b then "Wall" else "Corridor"
 getOptions (l,a,r,_) = "There is a "++(wallOrWay l)++" to the left, a "++(wallOrWay a)++" ahead, and a "++(wallOrWay r)++" to the right."
 
 instance Show Game where
-  show (Game (Maze m, h, (p:ps), l)) = (getOptions $ rotateWalls h (m!p))
+  show (Game (Maze m, h, (p:ps), l)) = getOptions $ rotateWalls h (m!p)
 
-printHorizontalWall True (_,True,_,_)   = lift $ putStr " -" 
-printHorizontalWall True (_,False,_,_)  = lift $ putStr "  "
-printHorizontalWall False (_,_,_,True)  = lift $ putStr " -"
-printHorizontalWall False (_,_,_,False) = lift $ putStr "  "
+printHorizontalWall True (_,True,_,_)   = " -" 
+printHorizontalWall True (_,False,_,_)  = "  "
+printHorizontalWall False (_,_,_,True)  = " -"
+printHorizontalWall False (_,_,_,False) = "  "
 
 printVerticalWall ix = do
   (Game (Maze m, h, p, e)) <- get
-  (a,_,_,_) <- return (m!ix)
-  start     <- return ((last p) == ix)
-  exit      <- return (e == ix)
-  path      <- return (ix `elem` p)
-  x         <- return (case (start,exit,path) of
-                 (True,_,_) -> 's'
-                 (_,True,_) -> 'e'
-                 (_,_,True) -> '*'
-                 _ -> ' ')
+  let
+    (a,_,_,_) = m!ix
+    start     = (last p) == ix
+    exit      = e == ix
+    path      = ix `elem` p
+    x = case (start,exit,path) of
+          (True,_,_) -> 's'
+          (_,True,_) -> 'e'
+          (_,_,True) -> '*'
+          _          -> ' '
   case a of
     True  -> lift $ putStr ['|',x]
     False -> lift $ putStr [' ',x]
     
 printHorizontal m i u = do
   (Game (Maze a, _, _, _)) <- get
-  forM_ [ (a!(i,j)) | j <- [1..m] ] (printHorizontalWall u)
+  forM_ [ (a!(i,j)) | j <- [1..m] ] (lift . putStr . (printHorizontalWall u))
   lift $ putStrLn " "
 
 printVertical m i = do
@@ -76,8 +77,8 @@ printSection m i = do
   printHorizontal m i False
       
 printMaze = do
-  (Game (Maze m, _, _, _)) <- get
-  ((_,_),(n,m)) <- return $ bounds m
+  (Game (Maze a, _, _, _)) <- get
+  let ((_,_),(n,m)) = bounds a
   printHorizontal m n True
   forM_ [n,(n-1)..1] (printSection m)
   lift $ hFlush stdout
@@ -101,7 +102,7 @@ increaseLocation m h p@(i,j) =
     
 next MOVE = do
   (Game (Maze m, h, p@(p1:ps), l)) <- get
-  i <- return $ increaseLocation m h p1
+  let i = increaseLocation m h p1
   put (Game (Maze m, h, i:p, l))
 
 next (TURN d) = do
@@ -121,8 +122,9 @@ checkSuccess = do
       do
         lift $ print "Congratulations. You did it."
         lift $ print "Starting new game..."
-        ((_,_),(n,m)) <- return $ bounds a        
-        ng <- return $ mkGame n m
+        let
+          ((_,_),(n,m)) = bounds a        
+          ng = mkGame n m
         put ng
     else
       return ()
@@ -144,6 +146,5 @@ loop = forever (do
   
 main = do
   (n:m:[]) <- getArgs
-  g <- return $ mkGame (read m) (read n)
-  s <- execStateT loop g
+  s <- execStateT loop $ mkGame (read m) (read n)
   return ()
