@@ -19,7 +19,7 @@ newtype Game = Game (Maze, Heading, Path, Location, StdGen)
 
 chooseLocation cs g =
   let
-    n = (length cs)
+    n = length cs
     (i,ng) = randomR (0,n-1) g
   in 
     (cs!!i,ng)
@@ -64,11 +64,11 @@ mkPaths maze@(Maze arr) candidates mazeElements n m g =
 mkMaze n m s g =
   let
     arr = array ((1,1),(n,m)) [ ((i,j),(True,True,True,True)) | i <- [1..n], j <- [1..m] ]
-    maze = Maze (arr)
+    maze = Maze arr
     nbs = getNeighbors s [s] n m
     (ps,g2) = mkPaths maze nbs [s] n m g
   in
-    (Maze (arr // (mergeUpdates $ ps)),g2)
+    (Maze $ arr // (mergeUpdates ps),g2)
 
 mkGame n m g =
   let
@@ -82,20 +82,20 @@ mkGame n m g =
   in
     Game (maze, N, [start], end, g5)
 
-wallOrWay b = if b then "wall" else "corridor"
+wallOrWay b | True = "wall" | False = "corridor"
 
 getOptions (l,a,r,_) = "There is a "++(wallOrWay l)++" to the left, a "++(wallOrWay a)++" ahead, and a "++(wallOrWay r)++" to the right."
 
 instance Show Game where
-  show (Game (Maze m, h, (p:_), _, _)) = getOptions $ rotateWalls h (m!p)
+  show (Game (Maze m, h, (p:_), _, _)) = getOptions $ rotateWalls h $ m!p
 
-printHorizontalWall True (_,True,_,_)   = " -" 
-printHorizontalWall True (_,False,_,_)  = "  "
-printHorizontalWall False (_,_,_,True)  = " -"
-printHorizontalWall False (_,_,_,False) = "  "
+printHorizontalWall True  (_,True,_,_)   = " -" 
+printHorizontalWall True  (_,False,_,_)  = "  "
+printHorizontalWall False (_,_,_,True)   = " -"
+printHorizontalWall False (_,_,_,False)  = "  "
 
 printVerticalWall ix = do
-  (Game (Maze m, h, p, e, _)) <- get
+  Game (Maze m, h, p, e, _) <- get
   let
     (a,_,_,_) = m!ix
     start     = (last p) == ix
@@ -111,12 +111,12 @@ printVerticalWall ix = do
     False -> lift $ putStr [' ',x]
     
 printHorizontal m i u = do
-  (Game (Maze a, _, _, _, _)) <- get
-  forM_ [ (a!(i,j)) | j <- [1..m] ] (lift . putStr . (printHorizontalWall u))
+  Game (Maze a, _, _, _, _) <- get
+  forM_ [ (a!(i,j)) | j <- [1..m] ] $ lift . putStr . (printHorizontalWall u)
   lift $ putStrLn " "
 
 printVertical m i = do
-  forM_ [ (i,j) | j <- [1..m] ] (printVerticalWall)
+  forM_ [ (i,j) | j <- [1..m] ] printVerticalWall
   lift $ putStrLn "|"
 
 printSection m i = do
@@ -127,7 +127,7 @@ printMaze = do
   (Game (Maze a, _, _, _, _)) <- get
   let ((_,_),(n,m)) = bounds a
   printHorizontal m n True
-  forM_ [n,(n-1)..1] (printSection m)
+  forM_ [n,(n-1)..1] $ printSection m
   lift $ hFlush stdout
   
 rotateWalls N w = w
@@ -148,29 +148,29 @@ increaseLocation m h p@(i,j) =
         E -> if r then p else (i,j+1)
     
 next MOVE = do
-  (Game (Maze m, h, p@(p1:ps), l, g)) <- get
+  Game (Maze m, h, p@(p1:ps), l, g) <- get
   let i = increaseLocation m h p1
-  put (Game (Maze m, h, i:p, l, g))
+  put $ Game (Maze m, h, i:p, l, g)
 
 next (TURN d) = do
-  (Game (m, h, p, l, g)) <- get
-  put (Game (m, (rotateHeading h d), p, l, g))
+  Game (m, h, p, l, g) <- get
+  put $ Game (m, rotateHeading h d, p, l, g)
 
 next LOOK = return ()
 
 next (NEW n m) = do
-  (Game (_,_,_,_,g)) <- get
-  put (mkGame n m g)
+  Game (_,_,_,_,g) <- get
+  put $ mkGame n m g
 
 next SHOW = printMaze
 
 next RESET = do
-  (Game (m, _, p, l, g)) <- get
-  put (Game (m, N, [(last p)], l, g))
+  Game (m, _, p, l, g) <- get
+  put $ Game (m, N, [(last p)], l, g)
 
 checkSuccess = do
-  g@(Game (m@(Maze a),_,p:ps,l,gen))<- get
-  if (p == l)
+  Game (Maze a, _, p:ps, l, gen)<- get
+  if p == l
     then
       do
         lift $ print "Congratulations. You did it."
@@ -199,5 +199,5 @@ loop = forever (do
   
 main = do
   (n:m:seed:[]) <- getArgs
-  s <- execStateT loop $ mkGame (read m) (read n) (mkStdGen (read seed))
+  s <- execStateT loop $ mkGame (read m) (read n) $ mkStdGen (read seed)
   return ()
