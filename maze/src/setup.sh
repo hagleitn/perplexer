@@ -1,5 +1,5 @@
 function usage() {
-  echo "$0 <rows> <colums>"
+  echo "$0 <rows> <colums> <seed>"
 }
 
 export rows=$1
@@ -31,5 +31,5 @@ fi
 
 mkFifo mazeOut
 
-tail -f mazeIn | ./maze $1 $2 > mazeOut &
+tail -f mazeIn | ./maze $1 $2 $3 > mazeOut &
 
