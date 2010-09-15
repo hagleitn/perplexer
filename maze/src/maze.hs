@@ -10,7 +10,7 @@ import System.Random ( randomR, mkStdGen, StdGen )
 
 data Direction = LEFT | RIGHT deriving (Show, Eq, Ord, Read)
 data Heading = N | W | S | E deriving (Show, Eq, Ord)
-data Command = MOVE | TURN Direction | LOOK | NEW Int Int | SHOW deriving (Show, Eq, Ord, Read)
+data Command = MOVE | TURN Direction | LOOK | NEW Int Int | SHOW | RESET deriving (Show, Eq, Ord, Read)
 type Walls = (Bool, Bool, Bool, Bool)
 type Location = (Int,Int) 
 type Path = [Location]
@@ -163,6 +163,10 @@ next (NEW n m) = do
   put (mkGame n m g)
 
 next SHOW = printMaze
+
+next RESET = do
+  (Game (m, _, p, l, g)) <- get
+  put (Game (m, N, [(last p)], l, g))
 
 checkSuccess = do
   g@(Game (m@(Maze a),_,p:ps,l,gen))<- get
